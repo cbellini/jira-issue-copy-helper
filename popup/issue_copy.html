@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Copy Jira Issue</title>
+  <link rel="stylesheet" href="issue_copy.css">
+</head>
+<body>
+  <div class="container">
+    <div id="issue-info" class="issue-info">
+      <span id="issue-key" class="issue-key"></span>
+      <span id="issue-summary" class="issue-summary"></span>
+    </div>
+
+    <div id="error-message" class="error-message" hidden>
+      <p>No Jira issue detected on this page.</p>
+      <p class="hint">Navigate to a Jira issue page and try again.</p>
+    </div>
+
+    <div id="button-group" class="button-group">
+      <button id="copy-plain" class="copy-btn" data-format="plainText" title="Copy as plain text">
+        <span class="btn-icon">📝</span>
+        <span class="btn-text">Plain Text</span>
+        <span class="btn-example">KEY-123 - Summary</span>
+      </button>
+
+      <button id="copy-markdown" class="copy-btn" data-format="markdown" title="Copy as Markdown with summary">
+        <span class="btn-icon">📎</span>
+        <span class="btn-text">Markdown</span>
+        <span class="btn-example">[KEY-123 - Summary](url)</span>
+      </button>
+
+      <button id="copy-markdown-short" class="copy-btn" data-format="markdownShort" title="Copy as Markdown (key only)">
+        <span class="btn-icon">🔗</span>
+        <span class="btn-text">Markdown (Short)</span>
+        <span class="btn-example">[KEY-123](url)</span>
+      </button>
+
+      <button id="copy-html" class="copy-btn" data-format="html" title="Copy as HTML link">
+        <span class="btn-icon">🌐</span>
+        <span class="btn-text">HTML</span>
+        <span class="btn-example">&lt;a href="..."&gt;...&lt;/a&gt;</span>
+      </button>
+    </div>
+
+    <div id="toast" class="toast" hidden>
+      Copied to clipboard!
+    </div>
+  </div>
+
+  <script src="issue_copy.js"></script>
+</body>
+</html>

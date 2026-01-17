@@ -1,0 +1,26 @@
+{
+  "name": "jira-issue-copy-helper",
+  "version": "1.0.0",
+  "description": "Copy Jira issue details to clipboard in various formats",
+  "scripts": {
+    "test": "mocha tests/**/*.test.js",
+    "test:watch": "mocha tests/**/*.test.js --watch",
+    "build": "web-ext build --overwrite-dest",
+    "start": "web-ext run",
+    "lint": "web-ext lint && addons-linter manifest.json --self-hosted",
+    "package": "npm test && npm run build"
+  },
+  "devDependencies": {
+    "chai": "^4.3.10",
+    "mocha": "^10.2.0"
+  },
+  "author": "Chris Bellini",
+  "license": "MPL-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YOUR_USERNAME/jira-issue-copy-helper.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YOUR_USERNAME/jira-issue-copy-helper/issues"
+  }
+}

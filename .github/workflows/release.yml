@@ -1,0 +1,144 @@
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers on version tags like v1.0.0, v1.2.3, etc.
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+
+    - name: Install dependencies
+      run: npm ci
+
+    - name: Run tests
+      run: npm test
+
+    - name: Lint manifest
+      run: |
+        npm install -g addons-linter
+        addons-linter manifest.json --self-hosted
+
+  build:
+    name: Build Extension
+    needs: test  # Only build if tests pass
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.x'
+
+    - name: Install web-ext
+      run: npm install -g web-ext
+
+    - name: Build extension
+      run: web-ext build --overwrite-dest
+
+    - name: Get version from tag
+      id: get_version
+      run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Rename artifact
+      run: |
+        cd web-ext-artifacts
+        mv *.zip jira-issue-copy-helper-${{ steps.get_version.outputs.VERSION }}.zip
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: firefox-extension
+        path: web-ext-artifacts/*.zip
+        retention-days: 30
+
+  release:
+    name: Create GitHub Release
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Download artifact
+      uses: actions/download-artifact@v3
+      with:
+        name: firefox-extension
+        path: ./artifacts
+
+    - name: Get version and changelog
+      id: get_info
+      run: |
+        echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ./artifacts/*.zip
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+        body: |
+          ## Jira Issue Copy Helper v${{ steps.get_info.outputs.VERSION }}
+
+          ### Installation
+
+          1. Download the `.zip` file below
+          2. Go to `about:debugging` in Firefox
+          3. Click "This Firefox" → "Load Temporary Add-on"
+          4. Select the downloaded `.zip` file
+
+          For permanent installation, submit to [addons.mozilla.org](https://addons.mozilla.org) for signing.
+
+          ### What's Changed
+          See the automatically generated release notes below.
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # Optional: Sign with Mozilla (requires API credentials)
+  sign-mozilla:
+    name: Sign with Mozilla AMO
+    needs: build
+    runs-on: ubuntu-latest
+    if: ${{ vars.MOZILLA_SIGNING_ENABLED == 'true' }}  # Only run if enabled
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: '20.x'
+
+    - name: Install web-ext
+      run: npm install -g web-ext
+
+    - name: Sign extension with Mozilla
+      run: |
+        web-ext sign \
+          --api-key=${{ secrets.MOZILLA_API_KEY }} \
+          --api-secret=${{ secrets.MOZILLA_API_SECRET }}
+      continue-on-error: true  # Don't fail the workflow if signing fails
+
+    - name: Upload signed extension
+      if: success()
+      uses: actions/upload-artifact@v3
+      with:
+        name: signed-extension
+        path: web-ext-artifacts/*.xpi
+        retention-days: 90

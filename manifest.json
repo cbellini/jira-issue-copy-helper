@@ -1,0 +1,66 @@
+{
+  "manifest_version": 2,
+  "name": "Jira Issue Copy Helper",
+  "version": "1.0.0",
+  "description": "Copy Jira issue details to clipboard in various formats (plain text, Markdown, HTML)",
+  "author": "Chris Bellini",
+  "icons": {
+    "16": "icons/icon-default-16.png",
+    "32": "icons/icon-default-32.png",
+    "48": "icons/icon-default-48.png",
+    "96": "icons/icon-default-96.png"
+  },
+  "permissions": [
+    "activeTab",
+    "clipboardWrite",
+    "tabs"
+  ],
+  "background": {
+    "scripts": [
+      "background_script.js"
+    ],
+    "persistent": false
+  },
+  "page_action": {
+    "default_icon": {
+      "16": "icons/icon-default-16.png",
+      "19": "icons/icon-default-19.png",
+      "32": "icons/icon-default-32.png",
+      "38": "icons/icon-default-38.png"
+    },
+    "theme_icons": [
+      {
+        "light": "icons/icon-dark-19.png",
+        "dark": "icons/icon-light-19.png",
+        "size": 19
+      },
+      {
+        "light": "icons/icon-dark-38.png",
+        "dark": "icons/icon-light-38.png",
+        "size": 38
+      }
+    ],
+    "default_title": "Copy Jira Issue",
+    "default_popup": "popup/issue_copy.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.atlassian.net/browse/*",
+        "*://*.atlassian.net/jira/software/*/boards/*/backlog*",
+        "*://*.atlassian.net/jira/software/*/boards/*",
+        "*://*.atlassian.net/jira/*"
+      ],
+      "js": [
+        "content_script.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "jira-copy-helper@mozilla.org",
+      "strict_min_version": "91.0"
+    }
+  }
+}
