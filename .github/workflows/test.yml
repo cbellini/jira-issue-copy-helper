@@ -32,6 +32,8 @@ jobs:
       run: npm test
 
     - name: Lint manifest
+      # Only run linter on Node 20+ due to addons-linter requirements
+      if: matrix.node-version == '20.x'
       run: |
         npm install -g addons-linter
         addons-linter manifest.json --self-hosted
